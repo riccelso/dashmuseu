@@ -5,7 +5,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import pandas as pd
-import os
+import os, subprocess
+import gunicorn
 
 # pd.options.plotting.backend = "plotly"
 
@@ -64,7 +65,7 @@ cor_eventos = px.colors.sequential.Blues[3:]
 
 # ============= APP
 app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
-
+server = app.server
 
 # ============= MONTAGEM DE COMPONENTES
 # COLUNA 1
@@ -338,7 +339,7 @@ def mudar_opcoes(check):
 
 port = os.getenv('PORT')
 
+
 app.run_server(
     port=port,
-    debug=True,
 )

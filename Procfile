@@ -1,1 +1,1 @@
-web: python notebook.py
+web: gunicorn notebook:server
