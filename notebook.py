@@ -316,10 +316,10 @@ def mudar_opcoes(check):
     return [{'label':i, 'value':i} for i in estados.estado.values]
 
 
-port = os.environ.get('PORT', 5000)
+#port = os.environ.get('PORT', 5000)
 
 app.run_server(
-    port=port,
+#    port=port,
     debug=True, 
 )
 
