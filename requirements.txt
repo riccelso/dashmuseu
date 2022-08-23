@@ -9,3 +9,5 @@ pandas==1.4.2
 plotly==5.9.0
 toml==0.10.2
 msal
+pyarrow
+fastparquet
