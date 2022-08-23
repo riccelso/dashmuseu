@@ -337,7 +337,7 @@ def mudar_opcoes(check):
     return [{'label': i, 'value': i} for i in estados.estado.values]
 
 print('Procurando porta')
-port = os.environ.get('PORT')
+port = os.getenv('PORT')
 
 app.run_server(
     port=port,
