@@ -336,7 +336,6 @@ def mudar_opcoes(check):
         return [{'label': i, 'value': i} for i in np.unique(temp[temp.contagem_eventos > 0].estado_completo.values)]
     return [{'label': i, 'value': i} for i in estados.estado.values]
 
-print('Procurando porta')
 port = os.getenv('PORT')
 
 app.run_server(
