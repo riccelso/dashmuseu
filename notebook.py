@@ -47,9 +47,6 @@ cor_eventos = px.colors.sequential.Blues[3:]
 
 #px.colors.sequential.swatches()
 
-
-
-
 # TODO:
 # - mudar font
 # - mudar hover_name para cidade e eventos
@@ -337,5 +334,5 @@ def mudar_opcoes(check):
         return [{'label': i, 'value': i} for i in np.unique(temp[temp.contagem_eventos > 0].estado_completo.values)]
     return [{'label': i, 'value': i} for i in estados.estado.values]
 
-
-app.run_server(debug=True)
+if __name__=='__main__':
+    app.run_server(debug=True)
