@@ -6,7 +6,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 import os, subprocess
-import gunicorn
+#import gunicorn
 
 # pd.options.plotting.backend = "plotly"
 
@@ -337,8 +337,5 @@ def mudar_opcoes(check):
         return [{'label': i, 'value': i} for i in np.unique(temp[temp.contagem_eventos > 0].estado_completo.values)]
     return [{'label': i, 'value': i} for i in estados.estado.values]
 
-#port = os.environ.get('PORT', 5589)
-port = 8899
-app.run_server(
-    port=port,
-)
+
+app.run_server(debug=True)
