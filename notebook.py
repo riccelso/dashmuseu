@@ -16,7 +16,6 @@ faixaetaria = pd.read_parquet("curated/faixaetaria")
 libras = pd.read_parquet("curated/libras")
 regiao = pd.read_parquet('curated/regiao')
 estados = pd.read_parquet('curated/estados')
-print(estados.head(2))
 
 estados['estado'] = estados.estado.str.title()
 
@@ -233,7 +232,8 @@ app.layout = html.Div([
                     # DROPDOWN 1
                     dbc.Col([drop1], style={
                         'margin-bottom': dist_labdrops, 
-                        'padding-right':'11px'
+                        'padding-right':'11px',
+                        'color': 'black',
                         }),
                 ]),
 
@@ -242,7 +242,8 @@ app.layout = html.Div([
                 # DROPDOWN 2
                 dbc.Col([drop2], style={
                     'margin-bottom': dist_labdrops,
-                    'padding-right':'11px'
+                    'padding-right':'11px',
+                    'color': 'black',
                     }),
 
                 html.Label(children=['Filtro por Estado:'],
@@ -250,7 +251,8 @@ app.layout = html.Div([
                 # DROPDOWN 3
                 dbc.Col([drop3], style={
                     'margin-bottom': dist_labdrops,
-                    'padding-right': '11px'
+                    'padding-right': '11px',
+                    'color': 'black',
                     }),
 
                 html.Label(children=['Tipos de visualização:'], id='l4', style={
