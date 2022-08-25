@@ -6,7 +6,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 import os, subprocess
-from datetime import date
+from datetime import datetime
 # pd.options.plotting.backend = "plotly"
 
 eventos = pd.read_parquet("curated/eventos")
@@ -104,7 +104,8 @@ logo = html.Img(
     style={
         'height': '80px', 
         'width': '220px', 
-        'margin-left': '40px',
+        'margin-left': 'auto',
+        'margin-right': 'auto',
         'margin-top': '5px',
         }
 )
@@ -114,21 +115,21 @@ card1 = html.Img(
     src=app.get_asset_url('corn.png'),
     style={'height': '50px', 'width': '80px', 'margin-left': '60px',
            'margin-bottom': '20px', 'margin-top': '10px'}
-)  # width = largura
+)
 
 card2 = html.Img(
     id='card2',
     src=app.get_asset_url('corn.png'),
     style={'height': '50px', 'width': '80px', 'margin-left': '60px',
            'margin-bottom': '20px', 'margin-top': '10px'}
-)  # width = largura
+)
 
 card3 = html.Img(
     id='card3',
     src=app.get_asset_url('corn.png'),
     style={'height': '50px', 'width': '80px', 'margin-left': '60px',
            'margin-bottom': '20px', 'margin-top': '10px'}
-)  # width = largura
+)
 
 drop1 = dcc.Dropdown(
     options=[{'label': i, 'value': i}
@@ -141,7 +142,7 @@ drop1 = dcc.Dropdown(
 
 drop2 = dcc.Dropdown(
     options=[{'label': i, 'value': i}
-             for i in libras.trad_libras.unique()[-1:0:-1]],
+             for i in libras.trad_libras.unique()[::-1]],
     id='assistencia',
     placeholder='Habilitado somente para os eventos',
     disabled=True,
@@ -152,7 +153,7 @@ drop3 = dcc.Dropdown(
              for i in estados.estado.values],  # COLOCAR ESTADOS
     id='estados',
     placeholder='Clique para selecionar',
-    #multi=True
+    # multi=True,
     #value='BAHIA'
 )
 
@@ -170,7 +171,11 @@ check = dcc.RadioItems(
 )
 
 bt1 = dbc.Button('Resetar filtros', id='btn1', color="secondary",
-                 size="sm", style={'margin-left': '0px', 'margin-bottom':'20px'})
+                 size="sm", style={
+                    'margin-left': '0px', 
+                    # 'margin-bottom':'20px',
+                    'margin-top':'10px'
+                    })
 
 date_range = dcc.DatePickerRange(
     id='date_range',
@@ -195,6 +200,7 @@ fig.update_layout(
 
 # VARIÁVEIS AUXILIARES
 
+espaco_inter_col = '10px'
 dist_labdrops = '15px'
 teto = '15px'
 
@@ -216,7 +222,7 @@ app.layout = html.Div([
             dbc.Card([
             html.Div([
 
-                #html.Label('Filtrar data:'),
+                html.Label('Filtrar data de eventos:'),
                 html.Div([dbc.Row([date_range])], style={
                     'font-size': '1px',
                     'border': '1px solid #ccc',
@@ -272,13 +278,13 @@ app.layout = html.Div([
             inverse=True,
             outline=True,
             style={
-                'width':'300px', 
+                'width':'316px', 
                 'height':'76vh',
                 'margin-top':'40px',
                 }
             )
 
-        ]), #sm=3),
+        ], width='auto'),  # sm=3),
 
         dbc.Col([  # COLUNA 2
             
@@ -307,20 +313,24 @@ app.layout = html.Div([
                         className='cards'
                     ),
                 ])
-            ], style={'margin-top':teto, 'margin-left':'10px'}),
+            ], style={'margin-top':teto, 'margin-left':espaco_inter_col}),
             
             dbc.Row([mapa], style={
                     'margin-top': '20px',
                     'margin-bottom': '20px',
-                    'margin-left': '90px', 
+                    'margin-left': espaco_inter_col,
                     'height': '80vh',
+                    'width':'auto'
                     }
                 )  # C2 L2
 
-        ], sm=9),
+        ]),
     ])
-], style={'margin':'30px', 'margin-top':'0px'})
-
+], style={
+    'margin':'30px', 
+    'margin-top':'0px',
+    'flex-direction': 'col',
+    })
 
 @app.callback(
     Output('drop_idade', 'value'),
@@ -341,16 +351,21 @@ def limpar_filtros(btn1):
     Output('assistencia', 'placeholder'),
     Output('assistencia', 'disabled'),
     Output('drop_idade', 'disabled'),
+    Input('date_range', 'start_date'),
+    Input('date_range', 'end_date'),
     Input('drop_idade', 'value'),
     Input('assistencia', 'value'),
     Input('estados', 'value'),
     Input('btn1', 'n_clicks'),
     Input('check', 'value')
 )
-def config_dados(drop_idade, drop_assistencia, drop_estado, btn1, check):
+def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estado, btn1, check):
     # Verificando ação de reset
-    check = check.strip()
     reset = callback_context.triggered[0]['prop_id'] == 'btn1.n_clicks'
+
+    # Tratamento de variáveis
+    check = check.strip()
+
 
     if check == 'Eventos por museu':
         placeholder = 'Clique para selecionar'
@@ -368,6 +383,17 @@ def config_dados(drop_idade, drop_assistencia, drop_estado, btn1, check):
     if not drop_assistencia is None and not reset:
         temp = temp[temp.traducao_libras == drop_assistencia]
 
+    
+    if len(data_inicio) <= 10:
+        data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
+        data_inicio = temp['data_inicio'] >= data_inicio
+        temp = temp[(data_inicio)]
+    if len(data_fim) <= 10:
+        data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
+        data_fim = temp['data_fim'] <= data_fim
+        temp = temp[(data_fim)]
+
+
     temp = temp[['id_museu', 'eventId']].groupby(
         'id_museu', as_index=None).count()
     temp.rename(columns={'eventId': 'contagem_eventos'}, inplace=True)
@@ -379,10 +405,24 @@ def config_dados(drop_idade, drop_assistencia, drop_estado, btn1, check):
         how='left'
     )
     
-    temp = temp[['latitude', 'longitude', 'regiao', 'contagem_eventos', 'estado_completo']]
-
+    temp = temp[[
+        'latitude', 
+        'longitude', 
+        'endereco', 
+        'cidade',
+        'regiao', 
+        'contagem_eventos',
+        'sigla_estado', 
+        'estado_completo', 
+        'cidade',
+        ]]
+    
     temp['estado_completo'] = temp['estado_completo'].replace(
         dict(estados[['id_estados', 'estado']].values)).copy()
+    
+    temp['sigla_estado'] = temp['sigla_estado'].replace(
+        dict(estados[['id_estados', 'sigla']].values)).copy()
+
 
     if not drop_estado is None and not reset:
         temp = temp[temp.estado_completo == drop_estado]
@@ -402,8 +442,16 @@ def config_dados(drop_idade, drop_assistencia, drop_estado, btn1, check):
         zoom, centro = 3.35, dict(lat=-13.904, lon=-49.747)
     else:
         if check == 'Localização dos museus':
-            centro = dict(lat=temp.latitude.mean(),
-                          lon=temp.longitude.mean())
+            centro = dict(
+                        lat=temp.latitude.mean()+3.5,
+                        lon=temp.longitude.mean()
+                    )\
+                    if drop_estado is None else \
+                    dict(
+                        lat=temp.latitude.mean(),
+                        lon=temp.longitude.mean()
+                    )
+
             zoom = 3 if drop_estado is None else 5
         elif check == 'Eventos por museu':
             centro = dict(lat=temp.latitude.mean(),
@@ -442,7 +490,7 @@ def config_dados(drop_idade, drop_assistencia, drop_estado, btn1, check):
             y=1.05,
             xanchor="left",
             x=0,
-            title='Região',
+            title='Regiões',
             # title_font_family="Times New Roman",
         ))
 
