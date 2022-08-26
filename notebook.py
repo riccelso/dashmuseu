@@ -83,15 +83,19 @@ cards_e_metricas = \
     },
 }
 
-
-
+# VARIAVEIS PRÉ-APP:
+result_config = {
+    'font-size': '22px',
+    'text-align': 'center',
+    'position': 'relative',
+    'margin-left': '8px',
+    'line-height': '1.2',
+}
 
 # TODO:
-# - mudar font
 # - mudar estilo da seleção da data
 # - mudar hover_name para cidade e eventos
-# - colocar filtros dentro de quadradro/card
-# CONSERTAR FILTROS QUE NÃO ESTÃO FUNCIONANDO COM EVENTOS
+# CONSERTAR FILTROS QUE NÃO ESTÃO FUNCIONANDO COM EVENTOS (o de ESTADO)
 
 
 # ============= APP
@@ -133,8 +137,9 @@ card1 = [
                          style={'font-size': '16px', 'text-align': 'center'}, 
                          id='titulo1'),
             dcc.Markdown(children=[''],
-                         style={'font-size': '22px', 'text-align': 'center'},
-                        id='resultado1'),
+                        id='resultado1',
+                         style=result_config,
+                        ),
         ], style={
             'margin-top': '2px',
             'margin-right': '20px',
@@ -161,8 +166,9 @@ card2 = [
                          style={'font-size': '16px', 'text-align': 'center'}, 
                          id='titulo2'),
             dcc.Markdown(children=[''],
-                         style={'font-size': '22px', 'text-align': 'center'},
-                        id='resultado2'),
+                         id='resultado2',
+                         style=result_config,
+            ),
         ], style={
             'margin-top': '2px',
             'margin-right': '20px',
@@ -189,8 +195,9 @@ card3 = [
                          style={'font-size': '16px', 'text-align': 'center'},
                          id='titulo3'),
             dcc.Markdown(children=[''],
-                         style={'font-size': '22px', 'text-align': 'center'},
-                         id='resultado3'),
+                         id='resultado3',
+                         style=result_config,
+            ),
         ], style={
             'margin-top': '2px',
             'margin-right': '20px',
@@ -252,8 +259,9 @@ date_range = dcc.DatePickerRange(
     start_date=inicio,
     end_date=fim,
     display_format='DD/MM/YYYY',
-    disabled=True
+    disabled=True,
 )
+
 
 # COLUNA 2
 mapa = dcc.Graph(id='mapa')
@@ -406,6 +414,7 @@ app.layout = html.Div([
     'margin':'30px', 
     'margin-top':'0px',
     'flex-direction': 'col',
+    # 'font-family': 'Sans-serif',
     })
 
 @app.callback(
@@ -431,6 +440,12 @@ def limpar_filtros(btn1):
     Output('resultado1', 'children'),
     Output('resultado2', 'children'),
     Output('resultado3', 'children'),
+    Output('resultado1', 'style'),
+    Output('resultado2', 'style'),
+    Output('resultado3', 'style'),
+    Input('resultado1', 'style'),
+    Input('resultado2', 'style'),
+    Input('resultado3', 'style'),
     Input('date_range', 'start_date'),
     Input('date_range', 'end_date'),
     Input('drop_idade', 'value'),
@@ -439,9 +454,10 @@ def limpar_filtros(btn1):
     Input('btn1', 'n_clicks'),
     Input('check', 'value')
 )
-def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estado, btn1, check):
+def config_dados(style1, style2, style3, data_inicio, data_fim, drop_idade, drop_assistencia, drop_estado, btn1, check):
     # Verificando ação de reset
     reset = callback_context.triggered[0]['prop_id'] == 'btn1.n_clicks'
+    styles = [style1, style2, style3]
 
     # Tratamento de variáveis
     check = check.strip()
@@ -659,13 +675,35 @@ def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estad
         resultados = [[contagem_museus],
                         [regiao_com_mais_museus.title()], 
                         [cidades_com_mais_museus]]
+        
+        for i, resp in enumerate(resultados):
+            if len(resp[0]) > 12 and ' ' in resp[0]:
+                styles[i].update({'margin-top': '-12px'})
+            else:
+                styles[i].update({'margin-top': '0px'})
+
     else:
         resultados = [[contagem_eventos],
                       [museu_mais_eventos],
                       [cidade_mais_eventos]]
+        
+        for i, resp in enumerate(resultados):
+            if len(resp[0]) > 12 and ' ' in resp[0]:
+                styles[i].update({'margin-top': '-12px'})
+            else:
+                styles[i].update({'margin-top': '0px'})
             
 
-    return fig_1, placeholder, placeholder, disabled, disabled, disabled, *resultados
+    return (
+        fig_1, 
+        placeholder, 
+        placeholder, 
+        disabled, 
+        disabled, 
+        disabled, 
+        *resultados,
+        *styles,
+    )
 
 
 @app.callback(
@@ -712,7 +750,6 @@ def cabecalho_cards(check):
     imagens = []
     for info in ['card1', 'card2', 'card3']:
         imagens.append(app.get_asset_url(infos[info]['img']))
-
     
     return infos['card1']['titulo'], infos['card2']['titulo'], infos['card3']['titulo'], *imagens
 
