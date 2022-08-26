@@ -49,50 +49,54 @@ fim = inter.data_inicio.max()
 cor_eventos = px.colors.sequential.Blues[3:]
 cor_museus = 'Viridis'
 
-#px.colors.sequential.swatches()
+
+# CARDS E METRICAS:
+cards_e_metricas = \
+{
+    'Localização dos museus':{
+        'card1':{
+            'titulo': '**Total de museus**',
+            'img': 'soma_total.png'
+        },
+        'card2':{
+            'titulo': '**Região c/ mais museus**',
+            'img': 'evento.png'
+        },
+        'card3':{
+            'titulo': '**Cidade c/ mais museus**',
+            'img': 'mapa-da-cidade.png'
+        }
+    },
+    'Eventos por museu': {
+        'card1': {
+            'titulo': '**Total de eventos**',
+            'img': 'calendario.png'
+        },
+        'card2': {
+            'titulo': '**Museu c/ mais eventos**',
+            'img': 'museu_card.png'
+        },
+        'card3': {
+            'titulo': '**Cidade c/ mais eventos**',
+            'img': 'mapa-da-cidade.png'
+        }
+    },
+}
+
+
+
 
 # TODO:
 # - mudar font
+# - mudar estilo da seleção da data
 # - mudar hover_name para cidade e eventos
-# - serie temporal acima do mapa
-# - deseparecer com opções se a escolha for "localização dos museus"?
-# - colocar legenda dentro de quadradro/card ou dentro do gráfico
 # - colocar filtros dentro de quadradro/card
-# - modificar logo
-# - mudar botao "resetar filtros"
-# - Cards com totais:
-#    nº total de eventos, total de museus, estado com + museus, museus com + eventos
-# - abaixar slider
+# CONSERTAR FILTROS QUE NÃO ESTÃO FUNCIONANDO COM EVENTOS
 
-# - Colocar nos cards:
-# dbc.Col(
-#     dbc.CardImg(
-#         src="/static/images/portrait-placeholder.png",
-#         className="img-fluid rounded-start",
-#     ),
-#     className="col-md-4",
-# ),
-# dbc.Col(
-#     dbc.CardBody(
-#         [
-#             html.H4("Card title", className="card-title"),
-#             html.P(
-#                 "This is a wider card with supporting text "
-#                 "below as a natural lead-in to additional "
-#                 "content. This content is a bit longer.",
-#                 className="card-text",
-#             ),
-#             html.Small(
-#                 "Last updated 3 mins ago",
-#                 className="card-text text-muted",
-#             ),
-#         ]
-#     ),
-#     className="col-md-8",
-# ),
 
 # ============= APP
-app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])  # SLATE
+app = Dash(__name__, update_title='Carregando...',
+           external_stylesheets=[dbc.themes.CYBORG, 'assets\style.css'])  # SLATE
 server = app.server
 
 # ============= MONTAGEM DE COMPONENTES
@@ -110,26 +114,89 @@ logo = html.Img(
         }
 )
 
-card1 = html.Img(
-    id='card1',
-    src=app.get_asset_url('corn.png'),
-    style={'height': '50px', 'width': '80px', 'margin-left': '60px',
-           'margin-bottom': '20px', 'margin-top': '10px'}
-)
+card1 = [
+    dbc.Row([
+        dbc.Col([
+            html.Img(
+                id='card1',
+                src=app.get_asset_url('soma_total.png'),
+                style={
+                    'height': '50px', 
+                    'width': '55px', 
+                    'margin-left': '15px',
+                    'margin-top': '20px',
+                }
+            ),
+        ], sm=3),
+        dbc.Col([
+            dcc.Markdown(children=['**Total de museus**'],
+                         style={'font-size': '16px', 'text-align': 'center'}, 
+                         id='titulo1'),
+            dcc.Markdown(children=[''],
+                         style={'font-size': '22px', 'text-align': 'center'},
+                        id='resultado1'),
+        ], style={
+            'margin-top': '2px',
+            'margin-right': '20px',
+            }),
+    ]),
+]
 
-card2 = html.Img(
-    id='card2',
-    src=app.get_asset_url('corn.png'),
-    style={'height': '50px', 'width': '80px', 'margin-left': '60px',
-           'margin-bottom': '20px', 'margin-top': '10px'}
-)
+card2 = [
+    dbc.Row([
+        dbc.Col([
+            html.Img(
+                id='card2',
+                src=app.get_asset_url('evento.png'),
+                style={
+                    'height': '50px',
+                    'width': '55px',
+                    'margin-left': '15px',
+                    'margin-top': '20px',
+                }
+            ),
+        ], sm=3),
+        dbc.Col([
+            dcc.Markdown(children=['**Região c/ mais museus**'],
+                         style={'font-size': '16px', 'text-align': 'center'}, 
+                         id='titulo2'),
+            dcc.Markdown(children=[''],
+                         style={'font-size': '22px', 'text-align': 'center'},
+                        id='resultado2'),
+        ], style={
+            'margin-top': '2px',
+            'margin-right': '20px',
+        }),
+    ]),
+]
 
-card3 = html.Img(
-    id='card3',
-    src=app.get_asset_url('corn.png'),
-    style={'height': '50px', 'width': '80px', 'margin-left': '60px',
-           'margin-bottom': '20px', 'margin-top': '10px'}
-)
+card3 = [
+    dbc.Row([
+        dbc.Col([
+            html.Img(
+                id='card3',
+                src=app.get_asset_url('evento.png'),
+                style={
+                    'height': '50px',
+                    'width': '55px',
+                    'margin-left': '15px',
+                    'margin-top': '20px',
+                }
+            ),
+        ], sm=3),
+        dbc.Col([
+            dcc.Markdown(children=['**Cidade c/ mais museus**'],
+                         style={'font-size': '16px', 'text-align': 'center'},
+                         id='titulo3'),
+            dcc.Markdown(children=[''],
+                         style={'font-size': '22px', 'text-align': 'center'},
+                         id='resultado3'),
+        ], style={
+            'margin-top': '2px',
+            'margin-right': '20px',
+        }),
+    ]),
+]
 
 drop1 = dcc.Dropdown(
     options=[{'label': i, 'value': i}
@@ -172,9 +239,10 @@ check = dcc.RadioItems(
 
 bt1 = dbc.Button('Resetar filtros', id='btn1', color="secondary",
                  size="sm", style={
-                    'margin-left': '0px', 
+                    'margin-left': '15px', 
                     # 'margin-bottom':'20px',
-                    'margin-top':'10px'
+                    'margin-top':'10px',
+                    'width':'140px'
                     })
 
 date_range = dcc.DatePickerRange(
@@ -184,6 +252,7 @@ date_range = dcc.DatePickerRange(
     start_date=inicio,
     end_date=fim,
     display_format='DD/MM/YYYY',
+    disabled=True
 )
 
 # COLUNA 2
@@ -200,10 +269,22 @@ fig.update_layout(
 
 # VARIÁVEIS AUXILIARES
 
+cor_cards = '#08336F'
 espaco_inter_col = '10px'
 dist_labdrops = '15px'
-teto = '15px'
-
+teto = '10px'
+drop_styles = \
+{
+    'margin':'auto',
+    'margin-top': '10px',
+    'font-size': '100%',
+    'width': '297px'
+}
+cards_config = {
+    # 'border-color': 'white',
+    'height': '87px',
+    'width': 'auto',
+}
 # ============= LAYOUT
 
 app.layout = html.Div([
@@ -213,7 +294,7 @@ app.layout = html.Div([
                 html.Div([
                     dbc.Card(
                         logo,
-                        color='primary',
+                        color=cor_cards,
                         inverse=True,
                         style={'margin-top':teto}
                     ),
@@ -222,18 +303,12 @@ app.layout = html.Div([
             dbc.Card([
             html.Div([
 
-                html.Label('Filtrar data de eventos:'),
-                html.Div([dbc.Row([date_range])], style={
-                    'font-size': '1px',
-                    'border': '1px solid #ccc',
-                    'margin-right': '16px',
-                    'margin-bottom': dist_labdrops,
-                        }
+                html.Div([dbc.Row([html.Label('Filtrar data de eventos:'),  date_range])], style=drop_styles
                     ),
 
                 html.Div([
                     # CAIXA 1
-                    html.Label(children=['Filtro de faixa etária:'], id='l1'),
+                    html.Label(children=['Filtro de faixa etária:'], id='l1', style={'margin-top':'20px'}),
                     
                     # DROPDOWN 1
                     dbc.Col([drop1], style={
@@ -241,7 +316,6 @@ app.layout = html.Div([
                         'padding-right':'11px',
                         'color': 'black',
                         }),
-                ]),
 
                 # CAIXA 2
                 html.Label(children=['Interprete de Libras:'], id='l2'),
@@ -260,71 +334,73 @@ app.layout = html.Div([
                     'padding-right': '11px',
                     'color': 'black',
                     }),
+                ], style=drop_styles),
 
                 html.Label(children=['Tipos de visualização:'], id='l4', style={
-                           'margin-top': '15px'}),  # CAIXA 4
-                dbc.Row([check], style={'margin-top': '1px'}),
-            ], style={
-                'margin-top': '22px',
-                'margin-left':'10px'
-                }),
-            
-            html.Div(bt1, style={
-                'margin-top': '8px',
-                'margin-left': '10px'
-                }),
+                           'margin-top': '8px'}),  # CAIXA 4
+                dbc.Row([check, bt1], style={'margin-top': '1px'}),
+            ], style=drop_styles),
             ],
             color='secondary',
             inverse=True,
             outline=True,
             style={
-                'width':'316px', 
-                'height':'76vh',
-                'margin-top':'40px',
+                # 'width':'316px', 
+                'height':'79vh',
+                'margin-top':'35px',
                 }
             )
 
-        ], width='auto'),  # sm=3),
+        ], 
+        style={'width':'auto'}),  # sm=3),
 
+        html.Div([
         dbc.Col([  # COLUNA 2
             
             dbc.Row([
                 dbc.Col([
-                    dbc.Card(
-                        card1,
-                        color='primary',
-                        inverse=True,
-                        className='cards'
-                    ),
+                        dbc.Card(
+                            card1,
+                            color=cor_cards,
+                            inverse=True,
+                            outline=True,
+                            className='cards',
+                            style=cards_config
+                        ),
                 ]),
                 dbc.Col([
                     dbc.Card(
                         card2,
-                        color='primary',
+                        color=cor_cards,
                         inverse=True,
-                        className='cards'
+                        className='cards',
+                        style=cards_config
                     ),
                 ]),
                 dbc.Col([
                     dbc.Card(
                         card3,
-                        color='primary',
+                        color=cor_cards,
                         inverse=True,
-                        className='cards'
+                        className='cards',
+                        style=cards_config
                     ),
                 ])
-            ], style={'margin-top':teto, 'margin-left':espaco_inter_col}),
+            ], style={
+                'margin-top':teto,
+                'margin-left':'12px'
+                }),
             
             dbc.Row([mapa], style={
                     'margin-top': '20px',
                     'margin-bottom': '20px',
                     'margin-left': espaco_inter_col,
-                    'height': '80vh',
-                    'width':'auto'
+                    'height': '82vh',
+                    'width':'100%'
                     }
                 )  # C2 L2
 
-        ]),
+        ]),], style={'width':'938px'})
     ])
 ], style={
     'margin':'30px', 
@@ -351,6 +427,10 @@ def limpar_filtros(btn1):
     Output('assistencia', 'placeholder'),
     Output('assistencia', 'disabled'),
     Output('drop_idade', 'disabled'),
+    Output('date_range', 'disabled'),
+    Output('resultado1', 'children'),
+    Output('resultado2', 'children'),
+    Output('resultado3', 'children'),
     Input('date_range', 'start_date'),
     Input('date_range', 'end_date'),
     Input('drop_idade', 'value'),
@@ -394,6 +474,37 @@ def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estad
         temp = temp[(data_fim)]
 
 
+    if temp.empty:
+        contagem_museus = ''
+        regiao_com_mais_museus = ''
+        cidades_com_mais_museus = ''
+        contagem_eventos = ''
+        museu_mais_eventos = ''
+        cidade_mais_eventos = ''
+
+
+    # CONSERTAR FILTROS QUE NÃO ESTÃO FUNCIONANDO COM EVENTOS
+    if check == 'Eventos por museu':
+        contagem_eventos = str(np.count_nonzero(temp.id_eventos.unique()))
+
+        museu_mais_eventos = temp[['nome', 'id_eventos']].groupby('nome').count()
+        museu_mais_eventos = museu_mais_eventos.nlargest(
+            1, 'id_eventos').index[0]
+        
+        cidade_mais_eventos = pd.merge(
+            museu[['id_museu', 'cidade']],
+            temp[['id_museu', 'id_eventos']],
+            on='id_museu',
+            how='left'
+        )[['cidade', 'id_eventos']]
+        
+        cidade_mais_eventos = cidade_mais_eventos.groupby('cidade').count()
+        cidade_mais_eventos = cidade_mais_eventos.nlargest(
+            1, 'id_eventos').index[0]
+
+
+
+
     temp = temp[['id_museu', 'eventId']].groupby(
         'id_museu', as_index=None).count()
     temp.rename(columns={'eventId': 'contagem_eventos'}, inplace=True)
@@ -404,18 +515,19 @@ def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estad
         on='id_museu',
         how='left'
     )
-    
-    temp = temp[[
-        'latitude', 
-        'longitude', 
-        'endereco', 
-        'cidade',
-        'regiao', 
-        'contagem_eventos',
-        'sigla_estado', 
-        'estado_completo', 
-        'cidade',
-        ]]
+ 
+
+    # temp = temp[[
+    #     'latitude', 
+    #     'longitude', 
+    #     'endereco', 
+    #     'cidade',
+    #     'regiao', 
+    #     'contagem_eventos',
+    #     'sigla_estado', 
+    #     'estado_completo', 
+    #     'cidade',
+    #     ]]
     
     temp['estado_completo'] = temp['estado_completo'].replace(
         dict(estados[['id_estados', 'estado']].values)).copy()
@@ -428,11 +540,39 @@ def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estad
         temp = temp[temp.estado_completo == drop_estado]
 
     if check == 'Eventos por museu':
-        temp = temp[temp.contagem_eventos > 0]
+        temp = temp[temp.contagem_eventos.fillna(0) > 0]
+
 
         
     temp['regiao'] = temp.regiao.replace(dict(regiao.values))
     temp['regiao'] = temp.regiao.astype("category")
+
+    # CARDS E METRICAS:
+
+    if temp.empty:
+        contagem_museus = ''
+        regiao_com_mais_museus = ''
+        cidades_com_mais_museus = ''
+    elif check == 'Localização dos museus':
+        contagem_museus = str(np.count_nonzero(temp.id_museu.unique()))
+
+        regiao_com_mais_museus = temp[['id_museu', 'regiao']].groupby('regiao').count()
+        regiao_com_mais_museus = regiao_com_mais_museus.nlargest(1, 'id_museu').index[0]
+
+        #cidades_com_mais_museus = temp
+        cidades_com_mais_museus = temp[[
+            'cidade',
+            'id_museu'
+            ]].groupby('cidade').count()
+
+        cidades_com_mais_museus = cidades_com_mais_museus.nlargest(
+            1, 
+            'id_museu'
+            ).index[0]
+
+
+
+
 
     # AUTENTICANDO MAPBOX
     px.set_mapbox_access_token(open('mapbox/mapbox', 'r').read())
@@ -515,8 +655,17 @@ def config_dados(data_inicio, data_fim, drop_idade, drop_assistencia, drop_estad
 
     # hovertemplate="%{label}: <br>Popularity: %{percent} </br> %{text}"
 
+    if not check == 'Eventos por museu':
+        resultados = [[contagem_museus],
+                        [regiao_com_mais_museus.title()], 
+                        [cidades_com_mais_museus]]
+    else:
+        resultados = [[contagem_eventos],
+                      [museu_mais_eventos],
+                      [cidade_mais_eventos]]
+            
 
-    return fig_1, placeholder, placeholder, disabled, disabled
+    return fig_1, placeholder, placeholder, disabled, disabled, disabled, *resultados
 
 
 @app.callback(
@@ -545,6 +694,29 @@ def mudar_opcoes(check):
     if check == 'Eventos por museu':
         return [{'label': i, 'value': i} for i in np.unique(temp[temp.contagem_eventos > 0].estado_completo.values)]
     return [{'label': i, 'value': i} for i in estados.estado.values]
+
+
+@app.callback(
+    Output('titulo1', 'children'),
+    Output('titulo2', 'children'),
+    Output('titulo3', 'children'),
+    Output('card1', 'src'),
+    Output('card2', 'src'),
+    Output('card3', 'src'),
+    Input('check', 'value'),
+)
+def cabecalho_cards(check):
+    check = check.strip()
+    infos = cards_e_metricas[check]
+
+    imagens = []
+    for info in ['card1', 'card2', 'card3']:
+        imagens.append(app.get_asset_url(infos[info]['img']))
+
+    
+    return infos['card1']['titulo'], infos['card2']['titulo'], infos['card3']['titulo'], *imagens
+
+
 
 if __name__=='__main__':
     app.run_server(debug=True, port=8899)
