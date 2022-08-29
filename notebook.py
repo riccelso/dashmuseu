@@ -485,10 +485,13 @@ app.layout = html.Div([
     Output('drop_idade', 'value'),
     Output('assistencia', 'value'),
     Output('estados', 'value'),
+    Output('mes_inicio', 'value'),
+    Output('mes_fim', 'value'),
+    Output('ano', 'value'),
     Input('btn1', 'n_clicks'),
 )
 def limpar_filtros(btn1):
-    return None, None, None
+    return None, None, None, None, None, None
 
 
 
@@ -504,6 +507,9 @@ def limpar_filtros(btn1):
     Output('resultado1', 'style'),
     Output('resultado2', 'style'),
     Output('resultado3', 'style'),
+    Input('mes_inicio', 'value'),
+    Input('mes_fim', 'value'),
+    Input('ano', 'value'),
     Input('resultado1', 'style'),
     Input('resultado2', 'style'),
     Input('resultado3', 'style'),
@@ -513,7 +519,7 @@ def limpar_filtros(btn1):
     Input('btn1', 'n_clicks'),
     Input('check', 'value')
 )
-def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_estado, btn1, check):
+def config_dados(mes_inicio, mes_fim, ano, style1, style2, style3, drop_idade, drop_assistencia, drop_estado, btn1, check):
     # Verificando ação de reset
     reset = callback_context.triggered[0]['prop_id'] == 'btn1.n_clicks'
     styles = [style1, style2, style3]
@@ -537,8 +543,22 @@ def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_esta
 
     if not drop_assistencia is None and not reset:
         temp = temp[temp.traducao_libras == drop_assistencia]
-
     
+    try:
+        print()
+    except:
+        pass
+
+    if ano:
+        temp = temp[temp.data_inicio.dt.year == ano]
+    if mes_inicio and mes_fim is None:
+        temp = temp[temp.data_inicio.dt.month == mes_inicio]
+    elif mes_inicio and mes_fim:
+        temp = temp[temp.data_inicio.dt.month >= mes_inicio]
+        temp = temp[temp.data_inicio.dt.month <= mes_fim]
+
+
+
     # if len(data_inicio) <= 10:
     #     data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
     #     data_inicio = temp['data_inicio'] >= data_inicio
@@ -564,7 +584,12 @@ def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_esta
 
         museu_mais_eventos = temp[['nome', 'id_eventos']].groupby('nome').count()
         museu_mais_eventos = museu_mais_eventos.nlargest(
-            1, 'id_eventos').index[0]
+            1, 'id_eventos')
+        
+        if museu_mais_eventos.empty:
+            museu_mais_eventos = ''
+        else:
+            museu_mais_eventos = museu_mais_eventos.index[0]
         
         cidade_mais_eventos = pd.merge(
             museu[['id_museu', 'cidade']],
@@ -575,7 +600,14 @@ def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_esta
         
         cidade_mais_eventos = cidade_mais_eventos.groupby('cidade').count()
         cidade_mais_eventos = cidade_mais_eventos.nlargest(
-            1, 'id_eventos').index[0]
+            1, 'id_eventos')
+        
+        if cidade_mais_eventos.empty:
+            cidade_mais_eventos = ''
+        elif cidade_mais_eventos.values.flatten()[0] == 0:
+            cidade_mais_eventos = ''
+        else:
+            cidade_mais_eventos = cidade_mais_eventos.index[0]
 
 
 
@@ -632,7 +664,12 @@ def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_esta
         contagem_museus = str(np.count_nonzero(temp.id_museu.unique()))
 
         regiao_com_mais_museus = temp[['id_museu', 'regiao']].groupby('regiao').count()
-        regiao_com_mais_museus = regiao_com_mais_museus.nlargest(1, 'id_museu').index[0]
+        regiao_com_mais_museus = regiao_com_mais_museus.nlargest(1, 'id_museu')
+
+        if regiao_com_mais_museus.empty:
+            regiao_com_mais_museus = ''
+        else:
+            regiao_com_mais_museus = regiao_com_mais_museus.index[0]
 
         #cidades_com_mais_museus = temp
         cidades_com_mais_museus = temp[[
@@ -643,7 +680,12 @@ def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_esta
         cidades_com_mais_museus = cidades_com_mais_museus.nlargest(
             1, 
             'id_museu'
-            ).index[0]
+            )
+        
+        if cidades_com_mais_museus.empty:
+            cidades_com_mais_museus = ''
+        else:
+            cidades_com_mais_museus = cidades_com_mais_museus.index[0]
 
 
 
