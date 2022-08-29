@@ -83,7 +83,13 @@ cards_e_metricas = \
     },
 }
 
-# VARIAVEIS PRÉ-APP:
+# VARIÁVEIS AUXILIARES
+
+cor_cards = '#08336F'
+espaco_inter_col = '10px'
+dist_labdrops = '15px'
+teto = '10px'
+
 result_config = {
     'font-size': '22px',
     'text-align': 'center',
@@ -92,15 +98,29 @@ result_config = {
     'line-height': '1.2',
 }
 
+drop_styles = \
+    {
+        'margin': 'auto',
+        'margin-top': '10px',
+        'font-size': '100%',
+        'width': '297px'
+    }
+
+cards_config = {
+    # 'border-color': 'white',
+    'height': '87px',
+    'width': 'auto',
+}
+
 # TODO:
-# - mudar estilo da seleção da data
+# - ativar filtro da data sobre eventos
 # - mudar hover_name para cidade e eventos
 # CONSERTAR FILTROS QUE NÃO ESTÃO FUNCIONANDO COM EVENTOS (o de ESTADO)
 
 
 # ============= APP
 app = Dash(__name__, update_title='Carregando...',
-           external_stylesheets=[dbc.themes.CYBORG, 'assets\style.css'])  # SLATE
+           external_stylesheets=[dbc.themes.CYBORG])  # ou SLATE
 server = app.server
 
 # ============= MONTAGEM DE COMPONENTES
@@ -252,15 +272,77 @@ bt1 = dbc.Button('Resetar filtros', id='btn1', color="secondary",
                     'width':'140px'
                     })
 
-date_range = dcc.DatePickerRange(
-    id='date_range',
-    min_date_allowed=inicio,
-    max_date_allowed=fim,
-    start_date=inicio,
-    end_date=fim,
-    display_format='DD/MM/YYYY',
-    disabled=True,
-)
+date_range = dbc.Row([
+    dbc.Col([
+        dcc.Dropdown(
+            options=[{'label': i, 'value': i}
+                     for i in range(1, 12+1)],
+            id='mes_inicio',
+            placeholder='Inicio',
+            disabled=True,
+            style={'width': '70px'}
+        )
+    ]),
+    dbc.Col([
+        dcc.Dropdown(
+            id='mes_fim',
+            placeholder='Fim',
+            style={'width': '70px'},
+            disabled=True,
+        )
+    ]),
+    dbc.Col([
+        dcc.Dropdown(
+            options=[{'label': i, 'value': i}
+                    for i in range(inicio.year, fim.year+1)],
+            id='ano',
+            placeholder='Ano',
+            style={'width':'85px'},
+        )
+    ])
+], style={'color':'black'})
+
+# date_range = dbc.Col([
+#     html.Div(
+#         [
+#             dcc.RangeSlider(
+#                 id="mes", 
+#                 min=1, 
+#                 max=12, 
+#                 step=1,
+#                 marks={
+#                     str(i): ''  # str(i)[2:]
+#                     for i in range(1, 12 + 1)
+#                 },
+#                 tooltip={"placement": "bottom", "always_visible": True}
+#             ),
+#         ],
+#     ),
+#     html.Div([
+#         dcc.RangeSlider(
+#             id="ano", 
+#             min=inicio.year, 
+#             max=fim.year,
+#             step=1,
+#             marks=\
+#                 {
+#                     str(i): ''# str(i)[2:]
+#                     for i in range(inicio.year, fim.year +1)
+#                 },
+#             tooltip={"placement": "bottom", "always_visible": True}
+#         ),
+#     ])
+# ])
+
+# date_range = dcc.DatePickerRange(
+#     id='date_range',
+#     min_date_allowed=inicio,
+#     max_date_allowed=fim,
+#     start_date=inicio,
+#     end_date=fim,
+#     display_format='DD/MM/YYYY',
+#     disabled=True,
+# )
 
 
 # COLUNA 2
@@ -275,24 +357,6 @@ fig.update_layout(
     showlegend=False
 )
 
-# VARIÁVEIS AUXILIARES
-
-cor_cards = '#08336F'
-espaco_inter_col = '10px'
-dist_labdrops = '15px'
-teto = '10px'
-drop_styles = \
-{
-    'margin':'auto',
-    'margin-top': '10px',
-    'font-size': '100%',
-    'width': '297px'
-}
-cards_config = {
-    # 'border-color': 'white',
-    'height': '87px',
-    'width': 'auto',
-}
 # ============= LAYOUT
 
 app.layout = html.Div([
@@ -311,12 +375,12 @@ app.layout = html.Div([
             dbc.Card([
             html.Div([
 
-                html.Div([dbc.Row([html.Label('Filtrar data de eventos:'),  date_range])], style=drop_styles
+                html.Div([dbc.Row([html.Label('Filtro - mês de inicio, fim e ano:'), date_range])], #style=drop_styles
                     ),
 
                 html.Div([
                     # CAIXA 1
-                    html.Label(children=['Filtro de faixa etária:'], id='l1', style={'margin-top':'20px'}),
+                    html.Label(children=['Filtro de faixa etária:'], id='l1', style={'margin-top':'10px'}),
                     
                     # DROPDOWN 1
                     dbc.Col([drop1], style={
@@ -421,12 +485,10 @@ app.layout = html.Div([
     Output('drop_idade', 'value'),
     Output('assistencia', 'value'),
     Output('estados', 'value'),
-    Output('date_range', 'start_date'),
-    Output('date_range', 'end_date'),
     Input('btn1', 'n_clicks'),
 )
 def limpar_filtros(btn1):
-    return None, None, None, inicio, fim
+    return None, None, None
 
 
 
@@ -436,7 +498,6 @@ def limpar_filtros(btn1):
     Output('assistencia', 'placeholder'),
     Output('assistencia', 'disabled'),
     Output('drop_idade', 'disabled'),
-    Output('date_range', 'disabled'),
     Output('resultado1', 'children'),
     Output('resultado2', 'children'),
     Output('resultado3', 'children'),
@@ -446,15 +507,13 @@ def limpar_filtros(btn1):
     Input('resultado1', 'style'),
     Input('resultado2', 'style'),
     Input('resultado3', 'style'),
-    Input('date_range', 'start_date'),
-    Input('date_range', 'end_date'),
     Input('drop_idade', 'value'),
     Input('assistencia', 'value'),
     Input('estados', 'value'),
     Input('btn1', 'n_clicks'),
     Input('check', 'value')
 )
-def config_dados(style1, style2, style3, data_inicio, data_fim, drop_idade, drop_assistencia, drop_estado, btn1, check):
+def config_dados(style1, style2, style3, drop_idade, drop_assistencia, drop_estado, btn1, check):
     # Verificando ação de reset
     reset = callback_context.triggered[0]['prop_id'] == 'btn1.n_clicks'
     styles = [style1, style2, style3]
@@ -480,14 +539,14 @@ def config_dados(style1, style2, style3, data_inicio, data_fim, drop_idade, drop
         temp = temp[temp.traducao_libras == drop_assistencia]
 
     
-    if len(data_inicio) <= 10:
-        data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
-        data_inicio = temp['data_inicio'] >= data_inicio
-        temp = temp[(data_inicio)]
-    if len(data_fim) <= 10:
-        data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
-        data_fim = temp['data_fim'] <= data_fim
-        temp = temp[(data_fim)]
+    # if len(data_inicio) <= 10:
+    #     data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
+    #     data_inicio = temp['data_inicio'] >= data_inicio
+    #     temp = temp[(data_inicio)]
+    # if len(data_fim) <= 10:
+    #     data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
+    #     data_fim = temp['data_fim'] <= data_fim
+    #     temp = temp[(data_fim)]
 
 
     if temp.empty:
@@ -700,7 +759,6 @@ def config_dados(style1, style2, style3, data_inicio, data_fim, drop_idade, drop
         placeholder, 
         disabled, 
         disabled, 
-        disabled, 
         *resultados,
         *styles,
     )
@@ -752,6 +810,31 @@ def cabecalho_cards(check):
         imagens.append(app.get_asset_url(infos[info]['img']))
     
     return infos['card1']['titulo'], infos['card2']['titulo'], infos['card3']['titulo'], *imagens
+
+
+@app.callback(
+    Output('mes_inicio', 'disabled'),
+    Output('ano', 'disabled'),
+    Input('check', 'value'),
+)
+def filtro_de_datas(check):
+    if check == ' Eventos por museu':
+        return False, False
+    return True, True
+
+
+@app.callback(
+    Output('mes_fim', 'disabled'),
+    Output('mes_fim', 'options'),
+    Input('mes_inicio', 'value'),
+)
+def data_fim(data_inicio):
+    if data_inicio == 12 or data_inicio is None:
+        return True, []
+    
+    options = [{'label': i, 'value': i} for i in range(data_inicio, 12+1)]
+    
+    return False, options
 
 
 
