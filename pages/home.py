@@ -599,7 +599,6 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         contagem_eventos = ''
         museu_mais_eventos = ''
         cidade_mais_eventos = ''
-    print(temp.columns)
 
     if check == 'Eventos por museu':
         contagem_eventos = str(np.count_nonzero(temp.id_eventos.unique()))
@@ -669,6 +668,7 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     if check == 'Eventos por museu':
         temp = temp[temp.contagem_eventos.fillna(0) > 0]
 
+    regiao.iloc[:, -1] = regiao.iloc[:, -1].str.title()
     temp['regiao'] = temp.regiao.replace(dict(regiao.values))
     temp['regiao'] = temp.regiao.astype("category")
 
@@ -743,8 +743,33 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         color_continuous_scale=cor,
         # color_discrete_map=cor,
         size='contagem_eventos' if check == 'Eventos por museu' else None,
-        size_max=30
+        size_max=30,
+        hover_name='nome',
+        hover_data={
+            "Cidade": temp.cidade,
+            'Endereço': temp.endereco,
+            'Estado': temp.estado_completo,
+            'Região':temp.regiao,
+            'regiao':False,
+            'contagem_eventos':False,
+            'latitude': False,
+            'longitude': False,
+        }
+        if check != 'Eventos por museu'
+        else
+        {
+            'Quantidade de ventos': temp.contagem_eventos,   "Cidade": temp.cidade,
+            'Endereço': temp.endereco,
+            'Estado': temp.estado_completo,
+            'Região': temp.regiao,
+            'contagem_eventos': False,
+            'regiao': False, 
+            'latitude': False,
+            'longitude': False,
+        }
     )
+    
+    print(temp.columns)
 
     fig_1.update_layout(
         # outra maneira -> lat=-16.6, lon=-50.6)),
@@ -763,7 +788,8 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
             x=0,
             title='Regiões',
             # title_font_family="Times New Roman",
-        ))
+        ),
+    )
 
     fig_1.update_coloraxes(showscale=True)
     fig_1.layout.coloraxis.colorbar.title = 'Eventos'
@@ -773,8 +799,9 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
             bgcolor="white",
             font_size=16,
             font_family="Rockwell"
-        )
+        ),
     )
+
 
     #hover_name = "country",
     # hover_data = ["continent", "pop"]
