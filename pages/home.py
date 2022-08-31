@@ -1,26 +1,21 @@
-import plotly.graph_objects as go
-import plotly.express as px
 from dash import dcc, html, callback_context, register_page, page_container, page_registry, callback
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import numpy as np
-import os
-import subprocess
+import plotly.graph_objects as go
+import plotly.express as px
 import re
-from datetime import datetime
-
-from .tabelas import (
+from conexao import (
     pd,
-    eventos, 
-    occ, 
-    museu, 
-    museu2, 
-    faixaetaria, 
-    libras, 
-    regiao, 
+    np,
+    eventos,
+    occ,
+    museu,
+    museu2,
+    faixaetaria,
+    libras,
+    regiao,
     estados,
     inter,
-    np
 )
 
 
@@ -583,14 +578,6 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         temp = temp[temp.data_inicio.dt.month >= mes_inicio]
         temp = temp[temp.data_inicio.dt.month <= mes_fim]
 
-    # if len(data_inicio) <= 10:
-    #     data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d')
-    #     data_inicio = temp['data_inicio'] >= data_inicio
-    #     temp = temp[(data_inicio)]
-    # if len(data_fim) <= 10:
-    #     data_fim = datetime.strptime(data_fim, '%Y-%m-%d')
-    #     data_fim = temp['data_fim'] <= data_fim
-    #     temp = temp[(data_fim)]
 
     if temp.empty:
         contagem_museus = ''
@@ -603,8 +590,8 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     if check == 'Eventos por museu':
         contagem_eventos = str(np.count_nonzero(temp.id_eventos.unique()))
 
-        museu_mais_eventos = temp[['nome_y', 'id_eventos']].groupby(
-            'nome_y').count()
+        museu_mais_eventos = temp[['nome', 'id_eventos']].groupby(
+            'nome').count()
         museu_mais_eventos = museu_mais_eventos.nlargest(
             1, 'id_eventos')
 
@@ -636,7 +623,7 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     temp = temp[['id_museu', 'eventId']].groupby(
         'id_museu', as_index=None).count()
     temp.rename(columns={'eventId': 'contagem_eventos'}, inplace=True)
-
+    
     temp = pd.merge(
         museu,
         temp,
@@ -644,21 +631,9 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         how='left'
     )
 
-    # temp = temp[[
-    #     'latitude',
-    #     'longitude',
-    #     'endereco',
-    #     'cidade',
-    #     'regiao',
-    #     'contagem_eventos',
-    #     'sigla_estado',
-    #     'estado_completo',
-    #     'cidade',
-    #     ]]
+    # temp.rename(columns={'geoestado': 'estado_completo'}, inplace=True)
 
-    temp['estado_completo'] = temp['estado_completo'].replace(
-        dict(estados[['id_estados', 'estado']].values)).copy()
-
+    
     temp['sigla_estado'] = temp['sigla_estado'].replace(
         dict(estados[['id_estados', 'sigla']].values)).copy()
 
@@ -668,12 +643,9 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     if check == 'Eventos por museu':
         temp = temp[temp.contagem_eventos.fillna(0) > 0]
 
-    regiao.iloc[:, -1] = regiao.iloc[:, -1].str.title()
-    temp['regiao'] = temp.regiao.replace(dict(regiao.values))
-    temp['regiao'] = temp.regiao.astype("category")
+
 
     # CARDS E METRICAS:
-
     if temp.empty:
         contagem_museus = ''
         regiao_com_mais_museus = ''
@@ -769,7 +741,6 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         }
     )
     
-    print(temp.columns)
 
     fig_1.update_layout(
         # outra maneira -> lat=-16.6, lon=-50.6)),

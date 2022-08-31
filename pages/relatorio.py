@@ -1,18 +1,11 @@
 from dash import register_page, html, dash_table
 from dash.dash_table.Format import Format, Align
-from .tabelas import (
+from conexao import (
     pd,
-    eventos,
-    occ,
-    museu,
-    museu2,
-    faixaetaria,
-    libras,
-    regiao,
-    estados,
-    inter,
-    np
+    np,
+    relat,
 )
+
 register_page(
     __name__, 
     path_template="/relatorio",
@@ -32,68 +25,7 @@ def layout(
     **kwargs
     ):
 
-    occ_temp = occ[['id_occ', 'eventId', 'spaceId', 'data_inicio', 'hora_inicio', 'hora_fim', 'data_fim', 'timezone', 'preco']]
-
-    event_temp = eventos[['id_eventos', 'nome', 'faixa_etaria', 'descricao_longa',
-                          'descricao_curta', 'telefone', 'traducao_libras', 'info_para_registro',
-                          'site']]
-
-    event_temp.rename(dict(nome='nome_evento'), axis=1, inplace=True)
-
-    museu_temp = museu2[['id_museu', 'regiao', 'nome', 'endereco',
-                  'cidade', 'estado_completo']].copy()
-
-    museu_temp.rename({'nome':'nome_museu'}, axis=1, inplace=True)
-
-    relatorio = pd.merge(
-        occ_temp, 
-        museu_temp, 
-        left_on='spaceId', 
-        right_on='id_museu',
-        how='left'
-    )
-    
-    relatorio = pd.merge(
-        event_temp, 
-        relatorio, 
-        left_on='id_eventos',
-        right_on='eventId',
-        how='right'
-    )
-
-
-    relatorio = relatorio[[
-        'nome_evento', 
-        'faixa_etaria', 
-        'traducao_libras', 
-        'data_inicio', 
-        'hora_inicio',
-        'hora_fim', 
-        'data_fim', 
-        'preco', 
-        'telefone', 
-        'info_para_registro',
-        'site', 
-        'regiao',
-        'nome_museu', 
-        'endereco', 
-        'cidade', 
-        'estado_completo',
-        'descricao_longa',
-        'descricao_curta', 
-        ]].copy()  # CORRIGIR 'timezone' NO DATABRICKS
-    
-    relatorio['faixa_etaria'] = relatorio.faixa_etaria.replace(
-        dict(faixaetaria.values)).copy()
-    
-    relatorio['traducao_libras'] = relatorio.traducao_libras.replace(
-        dict(libras.values)).copy()
-
-    relatorio['estado_completo'] = relatorio['estado_completo'].replace(
-        dict(estados[['id_estados', 'estado']].values)).copy()
-
-    relatorio['regiao'] = relatorio.regiao.replace(dict(regiao.values))
-    
+    relatorio = relat.copy()
 
     if not faixaetaria_param is None:
         relatorio = relatorio[relatorio.faixa_etaria == faixaetaria_param]
