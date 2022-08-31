@@ -29,8 +29,8 @@ def registrar_localmente_bd():
         
         if not os.path.exists('curated'): os.mkdir('curated')
 
-        arquivos = [x.path for x in os.scandir('curated\\') if x.is_file()]
-        for arq in arquivos: os.unlink(f'curated\\{arq}')
+        arquivos = [x.path for x in os.scandir('curated/') if x.is_file()]
+        for arq in arquivos: os.unlink(f'curated/{arq}')
         
 
         CONFIG = toml.load('base_dados_info.toml')['config']
@@ -64,25 +64,25 @@ def registrar_localmente_bd():
                     df.iloc[:, -1] = df.iloc[:, -1].str.title()
                 if tab == 'museu':
                     df.rename(columns={'estado':'sigla_estado'}, inplace=True)
-                df.to_parquet(f'curated\\{tab}', index=None)
+                df.to_parquet(f'curated/{tab}', index=None)
         
             
 registrar_localmente_bd()
 
 
-if not os.path.exists('curated\\alternativas'): os.mkdir('curated\\alternativas')
+if not os.path.exists('curated/alternativas'): os.mkdir('curated/alternativas')
 
-if not os.listdir('curated\\alternativas'):
-    eventos = pd.read_parquet("curated\\eventos")
-    occ = pd.read_parquet('curated\\ocorrencias')
-    museu = pd.read_parquet('curated\\museu')
-    faixaetaria = pd.read_parquet("curated\\faixaetaria")
-    libras = pd.read_parquet("curated\\libras")
-    regiao = pd.read_parquet('curated\\regiao')
-    estados = pd.read_parquet('curated\\estados')
+if not os.listdir('curated/alternativas'):
+    eventos = pd.read_parquet("curated/eventos")
+    occ = pd.read_parquet('curated/ocorrencias')
+    museu = pd.read_parquet('curated/museu')
+    faixaetaria = pd.read_parquet("curated/faixaetaria")
+    libras = pd.read_parquet("curated/libras")
+    regiao = pd.read_parquet('curated/regiao')
+    estados = pd.read_parquet('curated/estados')
 
     estados['estado'] = estados.estado.str.title()
-    estados.to_parquet('curated\\estados')
+    estados.to_parquet('curated/estados')
 
     museu.rename(columns={'geoestado': 'estado_completo'}, inplace=True)
     museu.columns = [col.replace(' ', '_') for col in museu.columns]
@@ -97,7 +97,7 @@ if not os.listdir('curated\\alternativas'):
     museu['estado_completo'] = museu.estado_completo.replace(
         dict(estados[['id_estados', 'estado']].values)).copy()
 
-    museu.to_parquet('curated\\museu')
+    museu.to_parquet('curated/museu')
 
     museu2 = museu[['id_museu', 'regiao', 'latitude',
                     'longitude', 'nome', 'endereco', 'cidade', 'sigla_estado', 'estado_completo']].copy()
@@ -115,7 +115,7 @@ if not os.listdir('curated\\alternativas'):
 
     eventos.columns = [col.replace(' ', '_') for col in eventos.columns]
     eventos.rename({'nome': 'nome_evento'}, axis=1, inplace=True)
-    eventos.to_parquet('curated\\eventos')
+    eventos.to_parquet('curated/eventos')
 
 
     inter = pd.merge(
@@ -134,7 +134,7 @@ if not os.listdir('curated\\alternativas'):
     inter['data_fim'] = inter.data_fim.astype(np.datetime64)
 
 
-    museu2.to_parquet('curated\\alternativas\\museu2', index=None)
+    museu2.to_parquet('curated/alternativas/museu2', index=None)
 
 
     inter['regiao'] = inter.regiao.replace(dict(regiao.values))
@@ -144,7 +144,7 @@ if not os.listdir('curated\\alternativas'):
         dict(estados[['id_estados', 'estado']].values)).copy()
 
 
-    inter.to_parquet('curated\\alternativas\\inter', index=None)
+    inter.to_parquet('curated/alternativas/inter', index=None)
 
     occ_temp = occ[['id_occ', 'eventId', 'spaceId', 'data_inicio',
                     'hora_inicio', 'hora_fim', 'data_fim', 'timezone', 'preco']]
@@ -208,16 +208,16 @@ if not os.listdir('curated\\alternativas'):
 
     relat['regiao'] = relat.regiao.replace(dict(regiao.values))
 
-    relat.to_parquet('curated\\alternativas\\relat', index=None)
+    relat.to_parquet('curated/alternativas/relat', index=None)
 
 
-eventos = pd.read_parquet("curated\\eventos")
-occ = pd.read_parquet('curated\\ocorrencias')
-museu = pd.read_parquet('curated\\museu')
-faixaetaria = pd.read_parquet("curated\\faixaetaria")
-libras = pd.read_parquet("curated\\libras")
-regiao = pd.read_parquet('curated\\regiao')
-estados = pd.read_parquet('curated\\estados')
-inter = pd.read_parquet('curated\\alternativas\\inter')
-museu2 = pd.read_parquet('curated\\alternativas\\museu2')
-relat = pd.read_parquet('curated\\alternativas\\relat')
+eventos = pd.read_parquet("curated/eventos")
+occ = pd.read_parquet('curated/ocorrencias')
+museu = pd.read_parquet('curated/museu')
+faixaetaria = pd.read_parquet("curated/faixaetaria")
+libras = pd.read_parquet("curated/libras")
+regiao = pd.read_parquet('curated/regiao')
+estados = pd.read_parquet('curated/estados')
+inter = pd.read_parquet('curated/alternativas/inter')
+museu2 = pd.read_parquet('curated/alternativas/museu2')
+relat = pd.read_parquet('curated/alternativas/relat')
