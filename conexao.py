@@ -16,8 +16,8 @@ tabelas = [
 
 
 def registrar_localmente_bd():
-    from pyodbc import connect
-    import toml
+    # from pyodbc import connect
+    # import toml
 
 
     conditions = [
