@@ -16,9 +16,6 @@ tabelas = [
 
 
 def registrar_localmente_bd():
-    # from pyodbc import connect
-    # import toml
-
 
     conditions = [
         os.path.exists('curated/estados'),
@@ -27,6 +24,8 @@ def registrar_localmente_bd():
     ]
 
     if not all(conditions):
+        from pyodbc import connect
+        import toml
         
         if not os.path.exists('curated'): os.mkdir('curated')
 
@@ -83,6 +82,8 @@ if not os.listdir('curated\\alternativas'):
     estados = pd.read_parquet('curated\\estados')
 
     estados['estado'] = estados.estado.str.title()
+    estados.to_parquet('curated\\estados')
+
     museu.rename(columns={'geoestado': 'estado_completo'}, inplace=True)
     museu.columns = [col.replace(' ', '_') for col in museu.columns]
     occ.columns = [col.replace(' ', '_') for col in occ.columns]
@@ -152,6 +153,7 @@ if not os.listdir('curated\\alternativas'):
                           'descricao_curta', 'telefone', 'traducao_libras', 'info_para_registro',
                           'site']]
 
+    event_temp.rename({'descricao_curta':'descricao'}, inplace=True)
 
     museu_temp = museu2[['id_museu', 'regiao', 'nome', 'endereco',
                          'cidade', 'estado_completo']].copy()

@@ -577,6 +577,9 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     elif mes_inicio and mes_fim:
         temp = temp[temp.data_inicio.dt.month >= mes_inicio]
         temp = temp[temp.data_inicio.dt.month <= mes_fim]
+    
+    if not drop_estado is None and not reset:
+        temp = temp[temp.estado_completo == drop_estado]
 
 
     if temp.empty:
@@ -590,8 +593,8 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     if check == 'Eventos por museu':
         contagem_eventos = str(np.count_nonzero(temp.id_eventos.unique()))
 
-        museu_mais_eventos = temp[['nome', 'id_eventos']].groupby(
-            'nome').count()
+        museu_mais_eventos = temp[['nome_evento', 'id_eventos']].groupby(
+            'nome_evento').count()
         museu_mais_eventos = museu_mais_eventos.nlargest(
             1, 'id_eventos')
 
@@ -636,6 +639,7 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
     
     temp['sigla_estado'] = temp['sigla_estado'].replace(
         dict(estados[['id_estados', 'sigla']].values)).copy()
+    
 
     if not drop_estado is None and not reset:
         temp = temp[temp.estado_completo == drop_estado]
@@ -730,8 +734,8 @@ def config_dados(mes_inicio, mes_fim, ano_inicio, ano_fim, style1, style2, style
         if check != 'Eventos por museu'
         else
         {
-            'Quantidade de ventos': temp.contagem_eventos,   "Cidade": temp.cidade,
-            'Endereço': temp.endereco,
+            'Quantidade de ventos': temp.contagem_eventos,  
+            "Cidade": temp.cidade,
             'Estado': temp.estado_completo,
             'Região': temp.regiao,
             'contagem_eventos': False,

@@ -27,6 +27,8 @@ def layout(
 
     relatorio = relat.copy()
 
+    relatorio.drop(columns='descricao_longa', inplace=True)
+
     if not faixaetaria_param is None:
         relatorio = relatorio[relatorio.faixa_etaria == faixaetaria_param]
 
@@ -46,8 +48,6 @@ def layout(
     if estado_param:
         relatorio = relatorio[relatorio.estado_completo == estado_param]
 
-    relatorio.columns = [col.replace('_', ' ').title()
-                         for col in relatorio.columns]
 
     layout = html.Div([
         dash_table.DataTable(
